@@ -10,6 +10,15 @@ on:
       - master
 
 jobs:
+  check-pr:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+    steps:
+      - uses: 8BitJonny/gh-get-current-pr@2.2.0
+        id: check_pr
+    outputs:
+      pr_found: ${{ steps.check_pr.outputs.pr_found }}
   auto-tag-pr:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-22.04
@@ -26,18 +35,17 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
   auto-tag:
+    needs: check-pr
+    if: needs.check-pr.outputs.pr_found == 'false'
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
-    - uses: 8BitJonny/gh-get-current-pr@2.2.0
-      id: check_pr
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
     - uses: hmarr/debug-action@v2
-    - if: steps.check_pr.outputs.pr_found == 'false'
-      name: Bump version and push tag
+    - name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.64.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
