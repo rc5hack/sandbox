@@ -26,16 +26,18 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         WITH_V: true
   auto-tag:
-    if: github.event_name != 'pull_request' && github.event.pull_request.merged != true
     runs-on: ubuntu-22.04
     permissions:
       contents: write
     steps:
+    - uses: 8BitJonny/gh-get-current-pr@2.2.0
+      id: check_pr
     - uses: actions/checkout@v3
       with:
         fetch-depth: '0'
     - uses: hmarr/debug-action@v2
-    - name: Bump version and push tag
+    - if: steps.check_pr.outputs.pr_found == 'false'
+      name: Bump version and push tag
       uses: anothrNick/github-tag-action@1.64.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
