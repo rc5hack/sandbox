@@ -1,4 +1,4 @@
 # sandbox
 
 test test
-foo
+foo bar
